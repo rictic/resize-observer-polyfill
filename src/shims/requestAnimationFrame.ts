@@ -14,7 +14,11 @@ export default (() => {
     return requestAnimationFrame.bind(global);
   }
 
-  const result: typeof requestAnimationFrame = callback =>
-      setTimeout(() => callback(Date.now()), 1000 / 60);
+  const result: typeof requestAnimationFrame =
+      (callback: (time: number) => void) => {
+        return setTimeout(() => {callback(+Date.now())}, 1000 / 60) as
+            unknown as number;
+      };
+
   return result;
 })();
