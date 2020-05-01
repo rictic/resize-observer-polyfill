@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    // "incremental": true,
+    "target": "esnext",
+    "module": "ES2020",
+    // "lib": [],
+    "allowJs": true,
+    "checkJs": true,
+    // "noEmit": true,
+    "declaration": true,
+    // "tsBuildInfoFile": "./",               /* Specify file to store incremental compilation information */
+    "downlevelIteration": true,
+    // "isolatedModules": true,               /* Transpile each file as a separate module (similar to 'ts.transpileModule'). */
+    /* Strict Type-Checking Options */
+    "strict": true,
+    /* Additional Checks */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    /* Source Map Options */
+    // "inlineSourceMap": true,               /* Emit a single file with source maps instead of having a separate file. */
+    // "inlineSources": true,                 /* Emit the source alongside the sourcemaps within a single file; requires '--inlineSourceMap' or '--sourceMap' to be set. */
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src/"
+  ]
+}
