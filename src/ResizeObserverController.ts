@@ -180,7 +180,7 @@ export default class ResizeObserverController {
               return shadowRoot;
           }
       }
-} else {
+    } else {
       document.addEventListener('DOMSubtreeModified', this.refresh);
 
       this.mutationEventsAdded_ = true;
