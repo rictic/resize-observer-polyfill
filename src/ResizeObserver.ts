@@ -31,7 +31,7 @@ class ResizeObserver {
   }
 
   unobserve(target: Element): void {
-    this.observer_.observe(target);
+    this.observer_.unobserve(target);
   }
   disconnect(): void {
     this.observer_.disconnect();

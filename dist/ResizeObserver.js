@@ -738,7 +738,7 @@
        * @param target Element to be observed.
        */
       ResizeObserverSPI.prototype.observe = function (target) {
-          if (!arguments.length) {
+          if (target === undefined) {
               throw new TypeError('1 argument required, but only 0 present.');
           }
           // Do nothing if current environment doesn't have the Element interface.
@@ -764,7 +764,7 @@
        * @param target Element to stop observing.
        */
       ResizeObserverSPI.prototype.unobserve = function (target) {
-          if (!arguments.length) {
+          if (target === undefined) {
               throw new TypeError('1 argument required, but only 0 present.');
           }
           // Do nothing if current environment doesn't have the Element interface.
@@ -862,7 +862,7 @@
           this.observer_.observe(target);
       };
       ResizeObserver.prototype.unobserve = function (target) {
-          this.observer_.observe(target);
+          this.observer_.unobserve(target);
       };
       ResizeObserver.prototype.disconnect = function () {
           this.observer_.disconnect();
