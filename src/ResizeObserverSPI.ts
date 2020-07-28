@@ -61,7 +61,7 @@ export default class ResizeObserverSPI {
    * @param target Element to be observed.
    */
   observe(target: Element) {
-    if (!arguments.length) {
+    if (target === undefined) {
       throw new TypeError('1 argument required, but only 0 present.');
     }
 
@@ -95,7 +95,7 @@ export default class ResizeObserverSPI {
    * @param target Element to stop observing.
    */
   unobserve(target: Element) {
-    if (!arguments.length) {
+    if (target === undefined) {
       throw new TypeError('1 argument required, but only 0 present.');
     }
 
