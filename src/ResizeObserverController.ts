@@ -14,6 +14,12 @@ const transitionKeys =
 // Check if MutationObserver is available.
 const mutationObserverSupported = typeof MutationObserver !== 'undefined';
 
+// Get the native implementation of HTMLElement.attachShadow
+const origAttachShadow = (
+  isBrowser && HTMLElement.prototype.attachShadow &&
+  HTMLElement.prototype.attachShadow.toString().indexOf('[native code]') !== -1
+) ? HTMLElement.prototype.attachShadow : null;
+
 /**
  * Singleton controller class which handles updates of ResizeObserver instances.
  */
@@ -143,13 +149,37 @@ export default class ResizeObserverController {
 
     if (mutationObserverSupported) {
       this.mutationsObserver_ = new MutationObserver(this.refresh);
+      const options = {
+          attributes: true,
+          childList: true,
+          characterData: true,
+          subtree: true
+      };
 
-      this.mutationsObserver_.observe(document, {
-        attributes: true,
-        childList: true,
-        characterData: true,
-        subtree: true
-      });
+      this.mutationsObserver_.observe(document, options);
+
+      if (origAttachShadow) {
+          const controller = this;
+
+          (function observeExistingShadowRoots(node: Element | ShadowRoot) {
+              const shadowRoot = (node as Element).shadowRoot;
+              if (shadowRoot) {
+                  controller.mutationsObserver_!.observe(shadowRoot, options);
+                  observeExistingShadowRoots(shadowRoot);
+              }
+              let child = node.firstElementChild;
+              while (child) {
+                  observeExistingShadowRoots(child);
+                  child = child.nextElementSibling;
+              }
+          })(document as unknown as Element);
+
+          HTMLElement.prototype.attachShadow = function (...args) {
+              const shadowRoot =  origAttachShadow.apply(this, args);
+              controller.mutationsObserver_!.observe(shadowRoot, options);
+              return shadowRoot;
+          }
+      }
     } else {
       document.addEventListener('DOMSubtreeModified', this.refresh);
 
@@ -174,6 +204,10 @@ export default class ResizeObserverController {
 
     if (this.mutationsObserver_) {
       this.mutationsObserver_.disconnect();
+
+      if (origAttachShadow) {
+        HTMLElement.prototype.attachShadow = origAttachShadow;
+      }
     }
 
     if (this.mutationEventsAdded_) {

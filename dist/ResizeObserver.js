@@ -110,6 +110,9 @@
   var transitionKeys = ['top', 'right', 'bottom', 'left', 'width', 'height', 'size', 'weight'];
   // Check if MutationObserver is available.
   var mutationObserverSupported = typeof MutationObserver !== 'undefined';
+  // Get the native implementation of HTMLElement.attachShadow
+  var origAttachShadow = (isBrowser && HTMLElement.prototype.attachShadow &&
+      HTMLElement.prototype.attachShadow.toString().indexOf('[native code]') !== -1) ? HTMLElement.prototype.attachShadow : null;
   /**
    * Singleton controller class which handles updates of ResizeObserver instances.
    */
@@ -216,12 +219,37 @@
           window.addEventListener('resize', this.refresh);
           if (mutationObserverSupported) {
               this.mutationsObserver_ = new MutationObserver(this.refresh);
-              this.mutationsObserver_.observe(document, {
+              var options_1 = {
                   attributes: true,
                   childList: true,
                   characterData: true,
                   subtree: true
-              });
+              };
+              this.mutationsObserver_.observe(document, options_1);
+              if (origAttachShadow) {
+                  var controller_1 = this;
+                  (function observeExistingShadowRoots(node) {
+                      var shadowRoot = node.shadowRoot;
+                      if (shadowRoot) {
+                          controller_1.mutationsObserver_.observe(shadowRoot, options_1);
+                          observeExistingShadowRoots(shadowRoot);
+                      }
+                      var child = node.firstElementChild;
+                      while (child) {
+                          observeExistingShadowRoots(child);
+                          child = child.nextElementSibling;
+                      }
+                  })(document);
+                  HTMLElement.prototype.attachShadow = function () {
+                      var args = [];
+                      for (var _i = 0; _i < arguments.length; _i++) {
+                          args[_i] = arguments[_i];
+                      }
+                      var shadowRoot = origAttachShadow.apply(this, args);
+                      controller_1.mutationsObserver_.observe(shadowRoot, options_1);
+                      return shadowRoot;
+                  };
+              }
           }
           else {
               document.addEventListener('DOMSubtreeModified', this.refresh);
@@ -242,6 +270,9 @@
           window.removeEventListener('resize', this.refresh);
           if (this.mutationsObserver_) {
               this.mutationsObserver_.disconnect();
+              if (origAttachShadow) {
+                  HTMLElement.prototype.attachShadow = origAttachShadow;
+              }
           }
           if (this.mutationEventsAdded_) {
               document.removeEventListener('DOMSubtreeModified', this.refresh);
